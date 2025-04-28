@@ -1,5 +1,4 @@
 import type { Route } from './+types/home';
-import AppCard from '@/components/card/appcard';
 import { useState } from 'react';
 import {
   DndContext,
@@ -9,14 +8,16 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type UniqueIdentifier,
+  type Announcements,
+  type DragStartEvent,
+  type DragOverEvent,
+  DragOverlay,
 } from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import _ from 'lodash';
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { ClientOnly } from 'remix-utils/client-only';
+import { Item } from '@/components/sortable/SortableItem';
+import Container from '@/components/sortable/Container';
 
 export function meta(_: Route.MetaArgs) {
   return [
@@ -25,8 +26,45 @@ export function meta(_: Route.MetaArgs) {
   ];
 }
 
-export default function Home() {
-  const [items, setItems] = useState<number[]>(_.range(5));
+type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
+
+export async function loader(_params: Route.LoaderArgs) {
+  const items: Items = {
+    A: [1, 2, 3],
+    B: [4, 5, 6],
+    C: [7, 8, 9],
+    D: [],
+  };
+  return items;
+}
+
+const announcements: Announcements = {
+  onDragStart({ active }): undefined {
+    console.log(`Picked up draggable item ${active.id}.`);
+  },
+  onDragOver({ active, over }): undefined {
+    if (over !== null) {
+      console.log(`Draggable item ${active.id} was moved over droppable area ${over.id}.`);
+      return;
+    }
+    console.log(`Draggable item ${active.id} is no longer over a droppable area.`);
+  },
+  onDragEnd({ active, over }): undefined {
+    if (over !== null) {
+      console.log(`Draggable item ${active.id} was dropped over droppable area ${over.id}`);
+      return;
+    }
+    console.log(`Draggable item ${active.id} was dropped.`);
+  },
+  onDragCancel(id): undefined {
+    console.log(`Dragging was cancelled. Draggable item ${id} was dropped.`);
+  },
+};
+
+export default function Home({ loaderData }: Route.ComponentProps) {
+  const [items, setItems] = useState<Items>(() => loaderData);
+  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -34,52 +72,143 @@ export default function Home() {
     }),
   );
 
-  function handleDragEnd(event: DragEndEvent) {
+  function findContainer(id: UniqueIdentifier): UniqueIdentifier | null {
+    if (id in items) {
+      return id;
+    }
+    return Object.keys(items).find((key) => items[key].includes(id)) ?? null;
+  }
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(event.active.id);
+  }
+
+  function handleDragOver(event: DragOverEvent) {
     const { active, over } = event;
-    if (over === null) {
-      console.warn('handleDragEnd: Over is Null');
+    if (over === null) return; // TODO: || active.id in items
+    // Variables to reduce Object lookup on active and over
+    const activeId = active.id;
+    const overId = over.id;
+
+    // Find the containers
+    const activeContainer = findContainer(activeId);
+    const overContainer = findContainer(overId);
+
+    // I don't need to move in DragOver inside the same container
+    if (activeContainer === null || overContainer === null || activeContainer === overContainer) {
       return;
     }
 
-    if (active.id !== over.id) {
-      setItems((items) => {
-        const oldIndex = items.indexOf(Number(active.id));
-        const newIndex = items.indexOf(Number(over.id));
+    setItems((prev) => {
+      const activeItems = prev[activeContainer];
+      const overItems = prev[overContainer];
 
-        return arrayMove(items, oldIndex, newIndex);
-      });
+      // Find the indexes for the items
+      const activeIndex = activeItems.indexOf(activeId);
+      const overIndex = overItems.indexOf(overId);
+
+      let newIndex: number;
+      if (overId in prev) {
+        // We're at the root droppable of a container (like the bg of the List)
+        // TODO: Non molto chiaro...
+        newIndex = overItems.length + 1;
+      } else {
+        /*
+        const isBelowOverItem =
+          over &&
+          active.rect.current.translated &&
+          active.rect.current.translated.top >
+            over.rect.top + over.rect.height;
+        */
+        const isBelowOverItem =
+          active.rect.current.translated &&
+          active.rect.current.translated.top > over.rect.top + over.rect.height;
+        // TODO: Serve davvero il check su overIndex?
+        //  Nell'esempio ufficiale dnd-kit e' assente.
+        const isBelowLastItem = overIndex === overItems.length - 1 && isBelowOverItem;
+
+        const modifier = isBelowLastItem ? 1 : 0;
+
+        newIndex = overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
+      }
+
+      // recentlyMovedToNewContainer.current = true;
+
+      return {
+        ...prev,
+        [activeContainer]: [...prev[activeContainer].filter((item) => item !== active.id)],
+        [overContainer]: [
+          ...prev[overContainer].slice(0, newIndex),
+          items[activeContainer][activeIndex],
+          ...prev[overContainer].slice(newIndex, prev[overContainer].length),
+        ],
+      };
+    });
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (over === null) return; // TODO: || active.id in items
+    // Variables to reduce Object lookup on active and over
+    const activeId = active.id;
+    const overId = over.id;
+
+    // Find the containers
+    const activeContainer = findContainer(activeId);
+    const overContainer = findContainer(overId);
+
+    // I need to move in DragEnd ONLY inside the same container!!!
+    if (activeContainer === null || overContainer === null || activeContainer !== overContainer) {
+      return;
     }
+
+    const activeIndex = items[activeContainer].indexOf(active.id);
+    const overIndex = items[overContainer].indexOf(overId);
+
+    if (activeIndex !== overIndex) {
+      setItems((items) => ({
+        ...items,
+        [overContainer]: arrayMove(items[overContainer], activeIndex, overIndex),
+      }));
+    }
+
+    setActiveId(null);
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <main className='flex items-start justify-center pt-4 pb-4 h-full'>
-        <div className='flex-1 flex flex-col items-center gap-4 h-full'>
-          <header className='flex flex-col items-center gap-9'>
-            <div className='w-[500px] max-w-[100vw] p-4 text-center'>
-              <h2 className='text-6xl'>Grello</h2>
-            </div>
-          </header>
-          <div className='grid grid-cols-5 w-full h-full'>
-            <SortableContext items={items} strategy={verticalListSortingStrategy}>
-              <div className='max-w-[300px] w-full space-y-6 px-4 h-full'>
-                <div className='h-full rounded-3xl border border-gray-200 p-6 dark:border-gray-700 space-y-4'>
-                  <p className='leading-6 text-gray-700 dark:text-gray-200 text-center'>
-                    List Test
-                  </p>
-                  <ul className='flex flex-col gap-2'>
-                    {items.map((id) => (
-                      <li key={id}>
-                        <AppCard id={id} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </SortableContext>
+    <main className='flex items-start justify-center pt-4 pb-4 h-full'>
+      <div className='flex-1 flex flex-col items-center gap-4 h-full'>
+        <header className='flex flex-col items-center gap-9'>
+          <div className='w-[500px] max-w-[100vw] p-4 text-center'>
+            <h2 className='text-6xl'>Grello</h2>
           </div>
+        </header>
+        <div className='grid grid-cols-5 w-full h-full'>
+          {/* ClientOnly is needed because for reason the aria-attr go HydrationError (sob)*/}
+          <ClientOnly fallback={<div>Loading...</div>}>
+            {() => (
+              <DndContext
+                accessibility={{ announcements }}
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
+              >
+                <Container id='A' items={items.A} />
+                <Container id='B' items={items.B} />
+                <Container id='C' items={items.C} />
+                <Container id='D' items={items.D} />
+                <DragOverlay>
+                  {activeId ?
+                    <Item id={activeId} />
+                  : null}
+                </DragOverlay>
+              </DndContext>
+            )}
+          </ClientOnly>
         </div>
-      </main>
-    </DndContext>
+      </div>
+    </main>
   );
 }

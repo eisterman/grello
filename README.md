@@ -85,3 +85,6 @@ This template comes with [Tailwind CSS](https://tailwindcss.com/) already config
 ---
 
 Built with ❤️ using React Router.
+
+## Useful Links:
+- [dnd-kit multi container really basic example!](https://codesandbox.io/p/sandbox/dnd-kit-multi-containers-lknfe)
