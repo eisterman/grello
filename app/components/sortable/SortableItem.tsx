@@ -18,6 +18,7 @@ export default function SortableItem({ id }: { id: UniqueIdentifier }) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    touchAction: 'none',
   };
 
   return (
