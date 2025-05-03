@@ -19,6 +19,8 @@ import { Item } from '@/components/sortable/SortableItem';
 import Container from '@/components/sortable/Container';
 import { use, useState } from 'react';
 import { ClientOnly } from '@/components/utils/ClientOnly';
+import { useTRPC } from '@/trpc/client';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 
@@ -46,6 +48,8 @@ const announcements: Announcements = {
 };
 
 export default function Kanban({ startItems }: { startItems: Promise<Items> }) {
+  const trpc = useTRPC();
+  const { data } = useSuspenseQuery(trpc.cards.list.queryOptions());
   const startItemsVal = use(startItems);
   const [items, setItems] = useState<Items>(() => startItemsVal);
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
@@ -180,6 +184,7 @@ export default function Kanban({ startItems }: { startItems: Promise<Items> }) {
           : null}
         </DragOverlay>
       </DndContext>
+      <div>{JSON.stringify(data, null, 2)}</div>
     </ClientOnly>
   );
 }

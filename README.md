@@ -35,6 +35,7 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-## MY Useful Links:
+## MY Useful Notes:
 - [dnd-kit multi container really basic example!](https://codesandbox.io/p/sandbox/dnd-kit-multi-containers-lknfe)
-
+- [TanStack/React-Query has regression on HydrationBoundary after v5.66.4](https://github.com/TanStack/query/issues/8677)
+- `pnpm exec drizzle-kit push` act directly on the db schema ignoring migrations. Very good for testing!
