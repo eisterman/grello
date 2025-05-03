@@ -13,9 +13,6 @@ export function Item({ id }: { id: UniqueIdentifier }) {
         </p>
       </div>
     </div>
-    // <div className='rounded-3xl border border-gray-200 dark:border-gray-700 bg-primary min-h-12 flex flex-col justify-center'>
-    //   <p className='text-center'>ELEMENT {id}</p>
-    // </div>
   );
 }
 

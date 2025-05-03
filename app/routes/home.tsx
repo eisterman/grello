@@ -2,7 +2,7 @@ import type { Route } from './+types/home';
 import { useState } from 'react';
 import {
   DndContext,
-  closestCenter,
+  closestCorners,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -182,14 +182,14 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             <h2 className='text-6xl'>Grello</h2>
           </div>
         </header>
-        <div className='flex flex-row justify-start items-stretch gap-8 w-screen h-full overflow-scroll px-4 md:px-8'>
+        <div className='flex flex-row justify-start items-stretch gap-8 w-screen h-full overflow-x-auto px-4 md:px-8'>
           {/* ClientOnly is needed because for reasons the aria-attr go HydrationError (sob)*/}
           <ClientOnly fallback={<div>Loading...</div>}>
             {() => (
               <DndContext
                 accessibility={{ announcements }}
                 sensors={sensors}
-                collisionDetection={closestCenter}
+                collisionDetection={closestCorners}
                 onDragStart={handleDragStart}
                 onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}

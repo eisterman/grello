@@ -16,12 +16,9 @@ export default function Container({
 
   return (
     <SortableContext id={id.toString()} items={items} strategy={verticalListSortingStrategy}>
-      <div
-        ref={setNodeRef}
-        className='max-w-[90vw] w-[300px] flex-shrink-0 p-4 rounded-3xl border border-gray-200 dark:border-gray-700 space-y-4'
-      >
+      <div className='max-w-[90vw] w-[300px] flex-shrink-0 p-4 rounded-3xl border border-gray-200 dark:border-gray-700 flex flex-col gap-4'>
         <p className='leading-6 text-gray-700 dark:text-gray-200 text-center'>List {id}</p>
-        <div className='flex flex-col gap-2'>
+        <div ref={setNodeRef} className='flex flex-col gap-2 grow overflow-y-auto'>
           {items.map((id) => (
             <SortableItem key={id} id={id} />
           ))}
