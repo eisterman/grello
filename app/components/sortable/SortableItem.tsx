@@ -4,9 +4,18 @@ import type { UniqueIdentifier } from '@dnd-kit/core';
 
 export function Item({ id }: { id: UniqueIdentifier }) {
   return (
-    <div className='rounded-3xl border border-gray-200 dark:border-gray-700 bg-primary min-h-12 flex flex-col justify-center'>
-      <p className='text-center'>ELEMENT {id}</p>
+    <div className='card bg-base-200 shadow-md'>
+      <div className='card-body p-4'>
+        <h2 className='card-title'>Element {id}</h2>
+        <p>
+          Content for this card, I will have this very long so that I can verify overflow and other
+          particularities of the component.
+        </p>
+      </div>
     </div>
+    // <div className='rounded-3xl border border-gray-200 dark:border-gray-700 bg-primary min-h-12 flex flex-col justify-center'>
+    //   <p className='text-center'>ELEMENT {id}</p>
+    // </div>
   );
 }
 
@@ -24,7 +33,7 @@ export default function SortableItem({ id }: { id: UniqueIdentifier }) {
   return (
     <div
       ref={setNodeRef}
-      className={`${isDragging && 'grayscale-50'}`}
+      className={`${isDragging && 'contrast-75'}`}
       style={style}
       {...attributes}
       {...listeners}

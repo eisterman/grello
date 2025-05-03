@@ -85,7 +85,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   function handleDragOver(event: DragOverEvent) {
     const { active, over } = event;
-    if (over === null) return; // TODO: || active.id in items
+    if (over === null) return; // QUESTION: || active.id in items
     // Variables to reduce Object lookup on active and over
     const activeId = active.id;
     const overId = over.id;
@@ -110,7 +110,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
       let newIndex: number;
       if (overId in prev) {
         // We're at the root droppable of a container (like the bg of the List)
-        // TODO: Non molto chiaro...
         newIndex = overItems.length + 1;
       } else {
         /*
@@ -123,7 +122,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         const isBelowOverItem =
           active.rect.current.translated &&
           active.rect.current.translated.top > over.rect.top + over.rect.height;
-        // TODO: Serve davvero il check su overIndex?
+        // QUESTION: Serve davvero il check su overIndex?
         //  Nell'esempio ufficiale dnd-kit e' assente.
         const isBelowLastItem = overIndex === overItems.length - 1 && isBelowOverItem;
 
@@ -148,7 +147,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
-    if (over === null) return; // TODO: || active.id in items
+    if (over === null) return; // QUESTION: || active.id in items
     // Variables to reduce Object lookup on active and over
     const activeId = active.id;
     const overId = over.id;
@@ -183,8 +182,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             <h2 className='text-6xl'>Grello</h2>
           </div>
         </header>
-        <div className='grid grid-cols-5 w-full h-full'>
-          {/* ClientOnly is needed because for reason the aria-attr go HydrationError (sob)*/}
+        <div className='flex flex-row justify-start items-stretch gap-8 w-screen h-full overflow-scroll px-4 md:px-8'>
+          {/* ClientOnly is needed because for reasons the aria-attr go HydrationError (sob)*/}
           <ClientOnly fallback={<div>Loading...</div>}>
             {() => (
               <DndContext
@@ -196,6 +195,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                 onDragEnd={handleDragEnd}
               >
                 <Container id='A' items={items.A} />
+                <div className='divider divider-horizontal mx-0'></div>
                 <Container id='B' items={items.B} />
                 <Container id='C' items={items.C} />
                 <Container id='D' items={items.D} />
