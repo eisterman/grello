@@ -1,5 +1,5 @@
-import type { Route } from './+types/home';
-import { useState } from 'react';
+'use client';
+
 import {
   DndContext,
   closestCorners,
@@ -15,28 +15,12 @@ import {
   DragOverlay,
 } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { ClientOnly } from 'remix-utils/client-only';
 import { Item } from '@/components/sortable/SortableItem';
 import Container from '@/components/sortable/Container';
-
-export function meta(_: Route.MetaArgs) {
-  return [
-    { title: 'Grello Test Dashboard' },
-    { name: 'description', content: 'First MVP for Grello!' },
-  ];
-}
+import { use, useState } from 'react';
+import { ClientOnly } from '@/components/utils/ClientOnly';
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
-
-export async function loader(_params: Route.LoaderArgs) {
-  const items: Items = {
-    A: [1, 2, 3],
-    B: [4, 5, 6],
-    C: [7, 8, 9],
-    D: [],
-  };
-  return items;
-}
 
 const announcements: Announcements = {
   onDragStart({ active }): undefined {
@@ -61,8 +45,9 @@ const announcements: Announcements = {
   },
 };
 
-export default function Home({ loaderData }: Route.ComponentProps) {
-  const [items, setItems] = useState<Items>(() => loaderData);
+export default function Kanban({ startItems }: { startItems: Promise<Items> }) {
+  const startItemsVal = use(startItems);
+  const [items, setItems] = useState<Items>(() => startItemsVal);
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
 
   const sensors = useSensors(
@@ -175,40 +160,26 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   }
 
   return (
-    <main className='flex items-start justify-center pt-4 pb-4 h-full'>
-      <div className='flex-1 flex flex-col items-center gap-4 h-full'>
-        <header className='flex flex-col items-center gap-9'>
-          <div className='w-[500px] max-w-[100vw] p-4 text-center'>
-            <h2 className='text-6xl'>Grello</h2>
-          </div>
-        </header>
-        <div className='flex flex-row justify-start items-stretch gap-8 w-screen h-full overflow-x-auto px-4 md:px-8'>
-          {/* ClientOnly is needed because for reasons the aria-attr go HydrationError (sob)*/}
-          <ClientOnly fallback={<div>Loading...</div>}>
-            {() => (
-              <DndContext
-                accessibility={{ announcements }}
-                sensors={sensors}
-                collisionDetection={closestCorners}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDragEnd={handleDragEnd}
-              >
-                <Container id='A' items={items.A} />
-                <div className='divider divider-horizontal mx-0'></div>
-                <Container id='B' items={items.B} />
-                <Container id='C' items={items.C} />
-                <Container id='D' items={items.D} />
-                <DragOverlay>
-                  {activeId ?
-                    <Item id={activeId} />
-                  : null}
-                </DragOverlay>
-              </DndContext>
-            )}
-          </ClientOnly>
-        </div>
-      </div>
-    </main>
+    <ClientOnly>
+      <DndContext
+        accessibility={{ announcements }}
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+      >
+        <Container id='A' items={items.A} />
+        <div className='divider divider-horizontal mx-0'></div>
+        <Container id='B' items={items.B} />
+        <Container id='C' items={items.C} />
+        <Container id='D' items={items.D} />
+        <DragOverlay>
+          {activeId ?
+            <Item id={activeId} />
+          : null}
+        </DragOverlay>
+      </DndContext>
+    </ClientOnly>
   );
 }
