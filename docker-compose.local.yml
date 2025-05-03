@@ -1,0 +1,15 @@
+services:
+  app:
+    image: grello-app
+    build: .
+  db:
+    image: postgres
+    restart: unless-stopped
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    ports:
+      - "5501:5432"
+    environment:
+      POSTGRES_USER: grello
+      POSTGRES_PASSWORD: gr3ll0
+      POSTGRES_DB: grello
