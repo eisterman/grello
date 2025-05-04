@@ -38,6 +38,9 @@ importers:
       drizzle-orm:
         specifier: ^0.43.1
         version: 0.43.1(@types/pg@8.11.14)(pg@8.15.6)
+      drizzle-seed:
+        specifier: ^0.3.1
+        version: 0.3.1(drizzle-orm@0.43.1(@types/pg@8.11.14)(pg@8.15.6))
       next:
         specifier: 15.3.1
         version: 15.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -87,9 +90,6 @@ importers:
       drizzle-kit:
         specifier: ^0.31.1
         version: 0.31.1
-      drizzle-seed:
-        specifier: ^0.3.1
-        version: 0.3.1(drizzle-orm@0.43.1(@types/pg@8.11.14)(pg@8.15.6))
       eslint:
         specifier: ^9.26.0
         version: 9.26.0(jiti@2.4.2)

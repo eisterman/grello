@@ -6,6 +6,11 @@ import { db } from '@/db';
 import { testseed } from '../../scripts/testseed';
 import { revalidatePath } from 'next/cache';
 
+// This page uses Postgresql so if it's accidentally rendered statically the BUILD process will
+// try to contact the DB and start to renderize the content based on the DB state at the build moment.
+// Force-dynamic make this page impossible to be rendered statically.
+export const dynamic = 'force-dynamic';
+
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 
 async function seedAction() {
