@@ -12,18 +12,6 @@ export const dynamic = 'force-dynamic';
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 
 export default async function Home() {
-  const items: Promise<Items> = new Promise((res) =>
-    setTimeout(
-      () =>
-        res({
-          A: [1, 2, 3],
-          B: [4, 5, 6],
-          C: [7, 8, 9],
-          D: [],
-        }),
-      500,
-    ),
-  );
   const kanban = await db.query.kanbans.findFirst();
   if (kanban === undefined) throw new Error('Missing Kanban in DB');
   prefetch(trpc.cards.list.queryOptions({ kanbanId: kanban.id }));
@@ -39,7 +27,7 @@ export default async function Home() {
           </header>
           <div className='flex flex-row justify-start items-stretch gap-8 w-screen h-full overflow-x-auto px-4 md:px-8'>
             <Suspense fallback={<div>Loading...</div>}>
-              <Kanban startItems={items} kanbanId={kanban.id} />
+              <Kanban kanbanId={kanban.id} />
             </Suspense>
           </div>
         </div>

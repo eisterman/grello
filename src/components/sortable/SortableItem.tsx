@@ -2,21 +2,24 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { UniqueIdentifier } from '@dnd-kit/core';
 
-export function Item({ id }: { id: UniqueIdentifier }) {
+export type ItemCard = {
+  id: number;
+  title: string;
+  body: string;
+};
+
+export function Item({ card }: { card: ItemCard }) {
   return (
     <div className='card bg-base-200 shadow-md'>
       <div className='card-body p-4'>
-        <h2 className='card-title'>Element {id}</h2>
-        <p>
-          Content for this card, I will have this very long so that I can verify overflow and other
-          particularities of the component.
-        </p>
+        <h2 className='card-title'>{card.title}</h2>
+        <p>{card.body}</p>
       </div>
     </div>
   );
 }
 
-export default function SortableItem({ id }: { id: UniqueIdentifier }) {
+export default function SortableItem({ id, card }: { id: UniqueIdentifier; card: ItemCard }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: id,
   });
@@ -35,7 +38,7 @@ export default function SortableItem({ id }: { id: UniqueIdentifier }) {
       {...attributes}
       {...listeners}
     >
-      <Item id={id} />
+      <Item card={card} />
     </div>
   );
 }

@@ -17,12 +17,11 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Item } from '@/components/sortable/SortableItem';
 import Container from '@/components/sortable/Container';
-import { use, useState } from 'react';
+import { useState } from 'react';
 import { ClientOnly } from '@/components/utils/ClientOnly';
 import { useTRPC } from '@/trpc/client';
 import { useSuspenseQuery } from '@tanstack/react-query';
-
-type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
+import type { Items } from '@/types/Items';
 
 const announcements: Announcements = {
   onDragStart({ active }): undefined {
@@ -47,18 +46,18 @@ const announcements: Announcements = {
   },
 };
 
-export default function Kanban({
-  startItems,
-  kanbanId,
-}: {
-  startItems: Promise<Items>;
-  kanbanId: number;
-}) {
+export default function Kanban({ kanbanId }: { kanbanId: number }) {
   const trpc = useTRPC();
-  const { data } = useSuspenseQuery(trpc.cards.list.queryOptions({ kanbanId }));
-  const startItemsVal = use(startItems);
-  const [items, setItems] = useState<Items>(() => startItemsVal);
+  const { data: cards } = useSuspenseQuery(trpc.cards.list.queryOptions({ kanbanId }));
+  const [items, setItems] = useState<Items>(() => {
+    const res: Items = {};
+    for (const cat of ['A', 'B', 'C', 'D']) {
+      res[cat] = cards.filter((c) => c.category === cat).map((c) => c.id);
+    }
+    return res;
+  });
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const activeCard = cards.find((c) => c.id === activeId) ?? null;
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -179,18 +178,18 @@ export default function Kanban({
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <Container id='A' items={items.A} />
+        <Container id='A' items={items.A} cards={cards} />
         <div className='divider divider-horizontal mx-0'></div>
-        <Container id='B' items={items.B} />
-        <Container id='C' items={items.C} />
-        <Container id='D' items={items.D} />
+        <Container id='B' items={items.B} cards={cards} />
+        <Container id='C' items={items.C} cards={cards} />
+        <Container id='D' items={items.D} cards={cards} />
         <DragOverlay>
-          {activeId ?
-            <Item id={activeId} />
+          {activeCard ?
+            <Item card={activeCard} />
           : null}
         </DragOverlay>
       </DndContext>
-      <div>{JSON.stringify(data, null, 2)}</div>
+      <div>{JSON.stringify(cards, null, 2)}</div>
     </ClientOnly>
   );
 }
