@@ -16,8 +16,9 @@ export const kanbanRouter = createTRPCRouter({
   //     // };
   //     // [...]
   //   }),
-  list: baseProcedure.query(() => {
-    // ...
-    return [];
+  list: baseProcedure.query(async ({ ctx: { db } }) => {
+    return await db.query.kanbans.findMany({
+      orderBy: (kanbans, { asc }) => [asc(kanbans.id)],
+    });
   }),
 });

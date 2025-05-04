@@ -4,7 +4,7 @@ import * as schema from '@/db/schema';
 import { kanbans, cards } from '@/db/schema';
 import { reset } from 'drizzle-seed';
 
-async function main() {
+export async function testseed() {
   console.log('Starting Loading...');
   const db = drizzle(process.env.DATABASE_URL!);
   await reset(db, schema);
@@ -23,4 +23,6 @@ async function main() {
   console.log('Load completed!');
 }
 
-main().then();
+if (require.main === module) {
+  testseed().then();
+}

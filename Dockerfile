@@ -1,5 +1,4 @@
 # syntax=docker.io/docker/dockerfile:1
-
 FROM node:22-alpine AS base
 
 # 1. Install dependencies only when needed
@@ -17,7 +16,6 @@ RUN \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i; \
   else echo "Lockfile not found." && exit 1; \
   fi
-
 
 # 2. Rebuild the source code only when needed
 FROM base AS builder

@@ -7,9 +7,14 @@ services:
     restart: unless-stopped
     # set shared memory limit when using docker-compose
     shm_size: 128mb
+    volumes:
+      - db_data:/var/lib/postgresql/data
     ports:
       - "5501:5432"
     environment:
       POSTGRES_USER: grello
       POSTGRES_PASSWORD: gr3ll0
       POSTGRES_DB: grello
+
+volumes:
+  db_data:

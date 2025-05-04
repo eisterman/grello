@@ -47,9 +47,15 @@ const announcements: Announcements = {
   },
 };
 
-export default function Kanban({ startItems }: { startItems: Promise<Items> }) {
+export default function Kanban({
+  startItems,
+  kanbanId,
+}: {
+  startItems: Promise<Items>;
+  kanbanId: number;
+}) {
   const trpc = useTRPC();
-  const { data } = useSuspenseQuery(trpc.cards.list.queryOptions());
+  const { data } = useSuspenseQuery(trpc.cards.list.queryOptions({ kanbanId }));
   const startItemsVal = use(startItems);
   const [items, setItems] = useState<Items>(() => startItemsVal);
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
