@@ -4,6 +4,11 @@ import { Suspense } from 'react';
 import { HydrateClient, prefetch, trpc } from '@/trpc/server';
 import { db } from '@/db';
 
+// This page uses Postgresql so if it's accidentally rendered statically the BUILD process will
+// try to contact the DB and start to renderize the content based on the DB state at the build moment.
+// Force-dynamic make this page impossible to be rendered statically.
+export const dynamic = 'force-dynamic';
+
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 
 export default async function Home() {
