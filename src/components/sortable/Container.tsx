@@ -13,7 +13,6 @@ export default function Container({
     id: number;
     body: string;
     title: string;
-    kanban: number;
     category: string;
   }[];
   items: UniqueIdentifier[];

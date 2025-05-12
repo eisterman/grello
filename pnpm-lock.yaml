@@ -38,6 +38,9 @@ importers:
       drizzle-orm:
         specifier: ^0.43.1
         version: 0.43.1(@types/pg@8.11.14)(pg@8.15.6)
+      drizzle-zod:
+        specifier: ^0.7.1
+        version: 0.7.1(drizzle-orm@0.43.1(@types/pg@8.11.14)(pg@8.15.6))(zod@3.24.3)
       next:
         specifier: 15.3.1
         version: 15.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -2018,6 +2021,12 @@ packages:
     peerDependenciesMeta:
       drizzle-orm:
         optional: true
+
+  drizzle-zod@0.7.1:
+    resolution: {integrity: sha512-nZzALOdz44/AL2U005UlmMqaQ1qe5JfanvLujiTHiiT8+vZJTBFhj3pY4Vk+L6UWyKFfNmLhk602Hn4kCTynKQ==}
+    peerDependencies:
+      drizzle-orm: '>=0.36.0'
+      zod: '>=3.0.0'
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -5057,6 +5066,11 @@ snapshots:
       pure-rand: 6.1.0
     optionalDependencies:
       drizzle-orm: 0.43.1(@types/pg@8.11.14)(pg@8.15.6)
+
+  drizzle-zod@0.7.1(drizzle-orm@0.43.1(@types/pg@8.11.14)(pg@8.15.6))(zod@3.24.3):
+    dependencies:
+      drizzle-orm: 0.43.1(@types/pg@8.11.14)(pg@8.15.6)
+      zod: 3.24.3
 
   dunder-proto@1.0.1:
     dependencies:

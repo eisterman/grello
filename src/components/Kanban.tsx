@@ -46,9 +46,9 @@ const announcements: Announcements = {
   },
 };
 
-export default function Kanban({ kanbanId }: { kanbanId: number }) {
+export default function Kanban() {
   const trpc = useTRPC();
-  const { data: cards } = useSuspenseQuery(trpc.cards.list.queryOptions({ kanbanId }));
+  const { data: cards } = useSuspenseQuery(trpc.cards.list.queryOptions());
   const [items, setItems] = useState<Items>(() => {
     const res: Items = {};
     for (const cat of ['A', 'B', 'C', 'D']) {

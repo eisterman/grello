@@ -1,20 +1,14 @@
-import type { UniqueIdentifier } from '@dnd-kit/core';
 import Kanban from '@/components/Kanban';
 import { Suspense } from 'react';
 import { HydrateClient, prefetch, trpc } from '@/trpc/server';
-import { db } from '@/db';
 
 // This page uses Postgresql so if it's accidentally rendered statically the BUILD process will
 // try to contact the DB and start to renderize the content based on the DB state at the build moment.
 // Force-dynamic make this page impossible to be rendered statically.
 export const dynamic = 'force-dynamic';
 
-type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
-
 export default async function Home() {
-  const kanban = await db.query.kanbans.findFirst();
-  if (kanban === undefined) throw new Error('Missing Kanban in DB');
-  prefetch(trpc.cards.list.queryOptions({ kanbanId: kanban.id }));
+  prefetch(trpc.cards.list.queryOptions());
 
   return (
     <HydrateClient>
@@ -27,7 +21,7 @@ export default async function Home() {
           </header>
           <div className='flex flex-row justify-start items-stretch gap-8 w-screen h-full overflow-x-auto px-4 md:px-8'>
             <Suspense fallback={<div>Loading...</div>}>
-              <Kanban kanbanId={kanban.id} />
+              <Kanban />
             </Suspense>
           </div>
         </div>
