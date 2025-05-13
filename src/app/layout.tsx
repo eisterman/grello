@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { TRPCReactProvider } from '@/trpc/client';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 export const metadata: Metadata = {
   title: 'Grello Test Dashboard',
@@ -15,7 +16,12 @@ export default function RootLayout({
   return (
     <html lang='en' className='h-full'>
       <body className='h-full'>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <TRPCReactProvider>
+          <>
+            {children}
+            <ReactQueryDevtools initialIsOpen={false} />
+          </>
+        </TRPCReactProvider>
       </body>
     </html>
   );

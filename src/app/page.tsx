@@ -12,14 +12,17 @@ export default async function Home() {
 
   return (
     <HydrateClient>
-      <main className='flex items-start justify-center pt-4 pb-4 h-full'>
+      <main className='flex items-start justify-center h-full'>
         <div className='flex-1 flex flex-col items-center gap-4 h-full'>
-          <header className='flex flex-col items-center gap-9'>
-            <div className='w-full p-4 text-center flex justify-center items-center'>
-              <h2 className='text-6xl'>Grello</h2>
+          <div className='navbar bg-base-200 shadow-sm'>
+            <div className='navbar-start'>
+              <button className='btn btn-ghost text-xl'>Grello Test</button>
             </div>
-          </header>
-          <div className='flex flex-row justify-start items-stretch gap-8 w-screen h-full overflow-x-auto px-4 md:px-8'>
+            <div className='navbar-end'>
+              <button className='btn btn-success'>Create</button>
+            </div>
+          </div>
+          <div className='flex flex-row justify-start items-stretch gap-8 w-screen h-full overflow-x-auto px-4 md:px-8 pb-4'>
             <Suspense fallback={<div>Loading...</div>}>
               <Kanban />
             </Suspense>
