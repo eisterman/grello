@@ -23,6 +23,10 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+export function HydrateFallback() {
+  return <div>ROOT HYDRATION IN PROGRESS...</div>;
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en' className='h-full'>

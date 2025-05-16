@@ -28,7 +28,7 @@ export function meta(_: Route.MetaArgs) {
 
 type Items = Record<UniqueIdentifier, UniqueIdentifier[]>;
 
-export async function loader(_params: Route.LoaderArgs) {
+export async function clientLoader(_params: Route.LoaderArgs) {
   const items: Items = {
     A: [1, 2, 3],
     B: [4, 5, 6],
