@@ -1,4 +1,4 @@
-import type { Route } from './+types/home';
+import type { Route } from './+types/_index';
 import { useState } from 'react';
 import {
   DndContext,
@@ -61,7 +61,7 @@ const announcements: Announcements = {
   },
 };
 
-export default function Home({ loaderData }: Route.ComponentProps) {
+export default function Index({ loaderData }: Route.ComponentProps) {
   const [items, setItems] = useState<Items>(() => loaderData);
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
 

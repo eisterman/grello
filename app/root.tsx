@@ -6,12 +6,44 @@ import {
   Scripts,
   ScrollRestoration,
 } from 'react-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
+import { QueryClient, QueryClientProvider, HydrationBoundary } from '@tanstack/react-query';
+import { useDehydratedState } from '@/lib/use-dehydrated-state';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import type { AppRouter } from '@/server/trpc/router';
 import type { Route } from './+types/root';
 import './app.css';
 import { useState } from 'react';
+import { createTRPCClient, httpBatchLink } from '@trpc/client';
+import { TRPCProvider } from '@/utils/trpc';
 
+// tRPC and ReactQuery
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        // With SSR, we usually want to set some default staleTime
+        // above 0 to avoid refetching immediately on the client
+        staleTime: 60 * 1000,
+      },
+    },
+  });
+}
+let browserQueryClient: QueryClient | undefined = undefined;
+function getQueryClient() {
+  if (typeof window === 'undefined') {
+    // Server: always make a new query client
+    return makeQueryClient();
+  } else {
+    // Browser: make a new query client if we don't already have one
+    // This is very important, so we don't re-make a new client if React
+    // suspends during the initial render. This may not be needed if we
+    // have a suspense boundary BELOW the creation of the query client
+    if (!browserQueryClient) browserQueryClient = makeQueryClient();
+    return browserQueryClient;
+  }
+}
+
+// RRv7 Root
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
   {
@@ -24,11 +56,6 @@ export const links: Route.LinksFunction = () => [
     href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
   },
 ];
-
-// Content before hydration
-export function HydrateFallback() {
-  return <div>ROOT HYDRATION IN PROGRESS...</div>;
-}
 
 // The Layout component is a special export for the root route.
 // It acts as your document's "app shell" for all route components, HydrateFallback, and ErrorBoundary
@@ -54,22 +81,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   // More info about React-Query + Remix SSR:
   // https://tanstack.com/query/latest/docs/framework/react/guides/ssr#full-remix-example
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            // With SSR, we usually want to set some default staleTime
-            // above 0 to avoid refetching immediately on the client
-            // staleTime: 60 * 1000,
-          },
-        },
-      }),
+  // https://trpc.io/docs/client/tanstack-react-query/setup#3a-setup-the-trpc-context-provider
+  const queryClient = getQueryClient();
+  const [trpcClient] = useState(() =>
+    createTRPCClient<AppRouter>({
+      links: [
+        httpBatchLink({
+          url: '/trpc',
+        }),
+      ],
+    }),
   );
+  const dehydratedState = useDehydratedState();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <HydrationBoundary state={dehydratedState}>
+        <TRPCProvider queryClient={queryClient} trpcClient={trpcClient}>
+          <Outlet />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </TRPCProvider>
+      </HydrationBoundary>
     </QueryClientProvider>
   );
 }
