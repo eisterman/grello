@@ -6,9 +6,11 @@ import {
   Scripts,
   ScrollRestoration,
 } from 'react-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import type { Route } from './+types/root';
 import './app.css';
+import { useState } from 'react';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -23,10 +25,14 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+// Content before hydration
 export function HydrateFallback() {
   return <div>ROOT HYDRATION IN PROGRESS...</div>;
 }
 
+// The Layout component is a special export for the root route.
+// It acts as your document's "app shell" for all route components, HydrateFallback, and ErrorBoundary
+// For more information, see https://reactrouter.com/explanation/special-files#layout-export
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en' className='h-full'>
@@ -46,7 +52,26 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  // More info about React-Query + Remix SSR:
+  // https://tanstack.com/query/latest/docs/framework/react/guides/ssr#full-remix-example
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            // With SSR, we usually want to set some default staleTime
+            // above 0 to avoid refetching immediately on the client
+            // staleTime: 60 * 1000,
+          },
+        },
+      }),
+  );
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Outlet />
+    </QueryClientProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
